@@ -1,5 +1,5 @@
 from typing import List
-from dagster import asset, AssetExecutionContext, AssetIn
+from dagster import asset, AssetExecutionContext, AssetIn, Definitions, define_asset_job, AssetSelection, ScheduleDefinition
 
 @asset(key="my_fist_asset_key", group_name="get_started")
 def my_first_asset(context: AssetExecutionContext):
@@ -41,7 +41,22 @@ def my_third_asset(
     context.log.info(f"Output data is: {data}")
     return data
 
-
+defs = Definitions(
+    assets = [my_first_asset, my_second_asset, my_third_asset],
+    jobs = [
+        define_asset_job (
+            name = "hello_dagster_job",
+            selection = AssetSelection.groups("get_started"),
+        )
+    ],
+    schedules = [
+        ScheduleDefinition(
+            name = "hello_dagster_schedule",
+            job_name = "hello_dagster_job",
+            cron_schedule = "* * * * *"
+        )
+    ]    
+)
 
 
 
